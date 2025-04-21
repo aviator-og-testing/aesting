@@ -3,4 +3,4 @@ import sqlalchemy
 print("Hello World!")
 
 
-dog = Dogs.query.filter(name="Good Boy")
+dog = session.execute(select(Dogs).where(name="Good Boy")).scalars().first()
