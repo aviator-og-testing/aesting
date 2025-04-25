@@ -1,4 +1,5 @@
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 from db_session import Session
 from user_model import User
 from product_model import Product, Review
@@ -45,7 +46,7 @@ def transfer_products_between_vendors(old_vendor_id, new_vendor_id):
     session = Session()
     try:
         # Start transaction
-        products = session.query(Product).filter(Product.vendor_id == old_vendor_id).all()
+        stmt = select(Product).where(Product.vendor_id == old_vendor_id)
         
         for product in products:
             product.vendor_id = new_vendor_id
