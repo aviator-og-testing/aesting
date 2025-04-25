@@ -1,5 +1,5 @@
 # This is copy #1 of advanced_queries.py
-from sqlalchemy import func, desc, case, text
+from sqlalchemy import func, desc, case, text, select
 from sqlalchemy.orm import aliased
 from db_session import Session
 from user_model import User
@@ -7,7 +7,7 @@ from product_model import Product, Category, Review
 
 def get_product_with_reviews():
     session = Session()
-    return session.query(
+    stmt = select(
         Product,
         func.count(Review.id).label('review_count'),
         func.avg(Review.rating).label('avg_rating')
@@ -19,18 +19,18 @@ def get_product_with_reviews():
         func.count(Review.id) > 0
     ).order_by(
         desc('avg_rating')
-    ).all()
+    )
 
 def get_product_by_category(category_name):
     session = Session()
-    return session.query(Product) \
+    stmt = select(Product) \
         .join(Product.categories) \
-        .filter(Category.name == category_name) \
-        .all()
+        .where(Category.name == category_name)
+    return session.execute(stmt).scalars().all()
 
 def get_top_rated_products(limit=5):
     session = Session()
-    return session.query(
+    stmt = select(
         Product.id,
         Product.name,
         func.avg(Review.rating).label('average_rating')
@@ -40,12 +40,11 @@ def get_top_rated_products(limit=5):
         Product.id, Product.name
     ).order_by(
         desc('average_rating')
-    ).limit(limit).all()
+    ).limit(limit)
 
 def get_products_with_price_range(min_price, max_price):
     session = Session()
-    return session.query(Product) \
-        .filter(Product.price >= min_price) \
-        .filter(Product.price <= max_price) \
-        .order_by(Product.price) \
-        .all()
+    stmt = select(Product) \
+        .where(Product.price >= min_price, Product.price <= max_price) \
+        .order_by(Product.price)
+    return session.execute(stmt).scalars().all()
