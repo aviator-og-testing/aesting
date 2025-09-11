@@ -6,20 +6,20 @@ from user_model import User
 from product_model import Product
 
 # Event listeners for User class
-@event.listens_for(User, 'before_insert')
+@event.listens_for(User, 'before_insert_exec')
 def user_before_insert(mapper, connection, target):
     print(f"About to insert user: {target.username}")
     # Could perform validation or transformation here
     if target.username:
         target.username = target.username.lower()
 
-@event.listens_for(User, 'after_insert')
+@event.listens_for(User, 'after_insert_exec')
 def user_after_insert(mapper, connection, target):
     print(f"User inserted with ID: {target.id}")
     # Could send welcome email or perform other actions
 
 # Event listeners for Product class
-@event.listens_for(Product, 'before_update')
+@event.listens_for(Product, 'before_update_exec')
 def product_before_update(mapper, connection, target):
     print(f"About to update product: {target.name}")
     # Validate price
