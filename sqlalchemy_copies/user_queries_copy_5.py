@@ -1,29 +1,29 @@
 # This is copy #5 of user_queries.py
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
 from db_session import Session
 from user_model import User
 
 def get_user_by_id(user_id):
-    return Session().query(User).filter(User.id == user_id).first()
+    return Session().execute(select(User).where(User.id == user_id)).scalars().first()
 
 def search_users(search_term):
-    return Session().query(User).filter(
+    return Session().execute(select(User).where(
         or_(
             User.username.ilike(f'%{search_term}%'),
             User.email.ilike(f'%{search_term}%')
         )
-    ).all()
+    )).scalars().all()
 
 def get_active_users():
-    return Session().query(User).filter(User.is_active == True).all()
+    return Session().execute(select(User).where(User.is_active == True)).scalars().all()
 
 def count_users():
-    return Session().query(func.count(User.id)).scalar()
+    return Session().scalar(select(func.count(User.id)))
 
 def update_user_status(user_id, is_active):
     session = Session()
-    user = session.query(User).get(user_id)
+    user = session.get(User, user_id)
     if user:
         user.is_active = is_active
         session.commit()
